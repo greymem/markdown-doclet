@@ -3,6 +3,7 @@ package name.neuhalfen.projects.markdowndoclet;
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.PackageDoc;
+import com.sun.javadoc.Type;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -12,12 +13,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * The main parser class. It scans the given Doclet document root and creates the markdown files.
+ *
+ * The work is done in Freemarker templates.
  *
  * @author Jens Neuhalfen
  */
@@ -41,6 +46,8 @@ public class Parser {
     // Some other recommended settings:
     configuration.setDefaultEncoding("UTF-8");
     configuration.setLocale(Locale.US);
+
+    configuration.setBooleanFormat("yes,no");
     configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 
     return new Parser(configuration);
@@ -61,32 +68,16 @@ public class Parser {
     }
 */
     if (classDoc instanceof AnnotationTypeDoc) {
-      parseAnnotationTypeDoc(w, (AnnotationTypeDoc) classDoc);
+      renderAnnotationTypeDoc(w, (AnnotationTypeDoc) classDoc);
     } else if (classDoc.isEnum()) {
-      parseEnum(w, classDoc);
+      renderEnum(w, classDoc);
     } else if (classDoc.isInterface()) {
-      parseInterface(w, classDoc);
+      renderInterface(w, classDoc);
     } else {
-      parseClass(w, classDoc);
+      renderClass(w, classDoc);
     }
   }
 
-/*
-  protected Package parsePackage(PackageDoc packageDoc) {
-    Package packageNode = objectFactory.createPackage();
-    packageNode.setName(packageDoc.name());
-    String comment = packageDoc.commentText();
-    if (comment.length() > 0) {
-      packageNode.setComment(comment);
-    }
-
-    for (Tag tag : packageDoc.tags()) {
-      packageNode.getTag().add(parseTag(tag));
-    }
-
-    return packageNode;
-  }
-*/
 
   /**
    * Parse an annotation.
@@ -94,25 +85,68 @@ public class Parser {
    * @param annotationTypeDoc A AnnotationTypeDoc instance
    * @return the annotation node
    */
-  protected void parseAnnotationTypeDoc(Writer w, AnnotationTypeDoc annotationTypeDoc)
+  private void renderAnnotationTypeDoc(Writer w, AnnotationTypeDoc annotationTypeDoc)
       throws IOException, TemplateException {
-    Template template = configuration.getTemplate("annotation.ftl");
-    template.process(annotationTypeDoc, w);
-  }
-
-  protected void parseEnum(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
-    Template template = configuration.getTemplate("class.ftl");
-    template.process(classDoc, w);
+    final String templateName = "class.ftl";
+    render(w, annotationTypeDoc, templateName);
   }
 
 
-  protected void parseInterface(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
-    Template template = configuration.getTemplate("class.ftl");
-    template.process(classDoc, w);
+
+  private void renderEnum(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
+    render(w, classDoc, "class.ftl");
   }
 
-  protected void parseClass(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
-    Template template = configuration.getTemplate("class.ftl");
-    template.process(classDoc, w);
+
+  private void renderInterface(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
+    render(w, classDoc, "interface.ftl");
+  }
+
+  private void renderClass(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
+    render(w, classDoc, "class.ftl");
+  }
+
+  private void render(Writer w, ClassDoc doc, String templateName)
+      throws IOException, TemplateException {
+    Template template = configuration.getTemplate(templateName);
+    Map<String, Object> input = new HashMap<String, Object>();
+    input.put("subject", doc);
+    input.put("util", new Helper(doc));
+    template.process(input, w);
+  }
+  public final static class Helper {
+
+    private final ClassDoc classDoc;
+
+    public Helper(ClassDoc classDoc) {
+      this.classDoc = classDoc;
+    }
+
+    public String getScope() {
+      if (classDoc.isPrivate()) {
+        return "private";
+      } else if (classDoc.isProtected()) {
+        return "protected";
+      } else if (classDoc.isPublic()) {
+        return "public";
+      }
+      return "";
+    }
+
+
+    public String dimension(Type type) {
+      try {
+        StringBuilder ret = new StringBuilder(type.qualifiedTypeName());
+        int dimension = Integer.parseInt(type.dimension());
+        for (int dim = 0; dim < dimension; dim++) {
+          ret.append("[]");
+        }
+        return ret.toString();
+      } catch (Exception e) {
+        return "";
+      }
+    }
+
+
   }
 }
