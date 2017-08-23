@@ -9,7 +9,7 @@
 
 	<groupId>name.neuhalfen.projects.markdowndoclet</groupId>
 	<artifactId>markdown-doclet</artifactId>
-	<version>1.0.6-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>Markdown Doclet</name>

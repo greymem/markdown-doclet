@@ -1,57 +1,100 @@
-# ${  subject.name() } extends ${ subject.superclassType().name() }
+<#import "lib/java.ftl" as java>
+---
+title: ${subject.name()}
+linktitle: ${subject.name()}
+<#if subject.firstSentenceTags()?has_content>description: <@compress  single_line=true><@java.tags subject.firstSentenceTags() /></@compress></#if>
+---
+<#-- Doc -->
+<@java.tags subject.inlineTags() />
 
 
+<#-- Base class/interface -->
+${java.annotations_for(subject)} **<@compress  single_line=true>${java.modifiers(subject)}  ${subject.typeName()}</@compress>**
+<#if subject.isClass()>
 
-    classNode.setQualified(${subject.qualifiedName()});
-    String comment= ${subject.commentText()};
+${java.classHierarchyWithInterfaces(subject, " * ", true)}
+<#elseif subject.isInterface() >
+<#-- ${java.interfaceHierarchy(subject, " * extends ")} -->
 
-    classNode.setAbstract(${subject.isAbstract()});
-    classNode.setError(${subject.isError()});
-    classNode.setException(${subject.isException()});
-    classNode.setExternalizable(${subject.isExternalizable()});
-    classNode.setIncluded(${subject.isIncluded()});
-    classNode.setSerializable(${subject.isSerializable()});
-    classNode.setScope("${util.scope}");
+${java.classHierarchyWithInterfaces(subject, " * ", true)}
 
-## TypeVariables
+</#if>
 
-<#list subject.typeParameters() as typeVariable>
-*  ${util.parseTypeParameter(typeVariable)}
+
+<#list subject.typeParameters()>
+##  Type Parameters
+
+|Name|Description|
+|--------|---------------|
+  <#items  as typeVariable>
+| &lt;${typeVariable.name()}<#list typeVariable.bounds()> extends <#items  as bound>${java.link(bound)}<#sep> & </#sep></#items><#else></#list>&gt;| ${util.getTypeParamComment(typeVariable)} |
+  </#items>
 </#list>
 
+<#-- Methods -->
 
-## Implemented interfaces
-
-<#list subject.interfaceTypes() as interfaceType>
-*  ${interfaceType.name()}
-</#list>
-
-## Constructor
-
-<#list subject.constructors() as constructor>
-*  ${constructor.name()}
-</#list>
-
+<#list subject.methods()>
 ## Methods
+|Method                | Description  |
+|----------------------|--------------------------|
+  <#items  as method>
+| ${java.modifier(method)}  ${java.link(method.returnType())} ${method.name()}(<@java.parameterList method.parameters() />) <@java.exceptionList method.thrownExceptionTypes() /> |  <@compress  single_line=true><@java.tags method.firstSentenceTags() /></@compress> |
+  </#items>
+</#list>
 
 <#list subject.methods() as method>
-*  ${method.name()}
+---
+### ${method.name()}
+
+${java.annotations_for(method)} ${java.link(method.returnType())} ${method.name()}(<@java.parameterList method.parameters() />) <@java.exceptionList method.thrownExceptionTypes() />
+
+<@java.tags method.inlineTags() />
+
+
+<#if method.typeParameters()?has_content>
+<@java.typeParameterWithTags util method.typeParameters()/>
+</#if>
+
+<#if method.paramTags()?has_content>
+<@java.parameterTags method.paramTags() />
+</#if>
+
+  <#if method.throwsTags()?has_content>
+#### Exceptions
+
+TODO: ThrowsTag[]throwsTags();
+  </#if>
 </#list>
 
+
+<#list subject.constructors()>
+## Constructor
+<#items as constructor>
+---
+### ${constructor.name()}(<@java.parameterList constructor.parameters() />) <@java.exceptionList constructor.thrownExceptionTypes() />
+
+<@java.tags constructor.inlineTags() />
+
+
+<#if constructor.typeParameters()?has_content>
+<@java.typeParameterWithTags util constructor.typeParameters()/>
+</#if>
+<#if constructor.paramTags()?has_content>
+<@java.parameterTags constructor.paramTags() />
+</#if>
+</#items>
+
+</#list>
+
+
+
+<#if subject.fields()?has_content>
 ## Fields
-
-<#list subject.fields() as field>
+  <#list subject.fields() as field>
 *  ${field.name()}
-</#list>
+  </#list>
+</#if>
 
-## Annotations
-<#list subject.annotations() as annotationDesc>
-*  ${annotationDesc.name()}
-</#list>
 
-## Tags
 
-<#list subject.tags() as tag>
-*  ${tag.name()}
-</#list>
-
+`package` `${subject.containingPackage().name()}`

@@ -60,11 +60,18 @@ public class MarkdownDoclet {
     OptionBuilder.withDescription("Parse javadoc, but don't write output file.\nDefault: false");
     options.addOption(OptionBuilder.create("dryrun"));
 
-    OptionBuilder.withArgName("filename");
+    OptionBuilder.withArgName("doctitle");
     OptionBuilder.isRequired(false);
     OptionBuilder.hasArg();
-    OptionBuilder.withDescription("Name of the output file.\nDefault: javadoc.xml");
-    options.addOption(OptionBuilder.create("filename"));
+    OptionBuilder.withDescription("IGNORED");
+    options.addOption(OptionBuilder.create("doctitle"));
+
+    OptionBuilder.withArgName("windowtitle");
+    OptionBuilder.isRequired(false);
+    OptionBuilder.hasArg();
+    OptionBuilder.withDescription("IGNORED");
+    options.addOption(OptionBuilder.create("windowtitle"));
+
   }
 
   /**
@@ -113,7 +120,6 @@ public class MarkdownDoclet {
     Parser parser = Parser.buildParser();
 
     for (ClassDoc classDoc : rootDoc.classes()) {
-      System.out.println(classDoc.name());
       final String packageName = classDoc.containingPackage().name();
       final File containingDir = buildContainingDirPath(commandLine, packageName);
       if (!containingDir.exists()) {
@@ -176,7 +182,7 @@ public class MarkdownDoclet {
    * @see com.sun.javadoc.Doclet#languageVersion()
    */
   public static LanguageVersion languageVersion() {
-    return LanguageVersion.JAVA_1_5;
+    return LanguageVersion.JAVA_1_5 ;
   }
 
   /**

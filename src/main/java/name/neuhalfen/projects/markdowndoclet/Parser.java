@@ -3,7 +3,6 @@ package name.neuhalfen.projects.markdowndoclet;
 import com.sun.javadoc.AnnotationTypeDoc;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.PackageDoc;
-import com.sun.javadoc.Type;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -92,14 +91,13 @@ public class Parser {
   }
 
 
-
   private void renderEnum(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
     render(w, classDoc, "class.ftl");
   }
 
 
   private void renderInterface(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
-    render(w, classDoc, "interface.ftl");
+    render(w, classDoc, "class.ftl");
   }
 
   private void renderClass(Writer w, ClassDoc classDoc) throws IOException, TemplateException {
@@ -111,42 +109,8 @@ public class Parser {
     Template template = configuration.getTemplate(templateName);
     Map<String, Object> input = new HashMap<String, Object>();
     input.put("subject", doc);
-    input.put("util", new Helper(doc));
+    input.put("util", new Util());
     template.process(input, w);
   }
-  public final static class Helper {
 
-    private final ClassDoc classDoc;
-
-    public Helper(ClassDoc classDoc) {
-      this.classDoc = classDoc;
-    }
-
-    public String getScope() {
-      if (classDoc.isPrivate()) {
-        return "private";
-      } else if (classDoc.isProtected()) {
-        return "protected";
-      } else if (classDoc.isPublic()) {
-        return "public";
-      }
-      return "";
-    }
-
-
-    public String dimension(Type type) {
-      try {
-        StringBuilder ret = new StringBuilder(type.qualifiedTypeName());
-        int dimension = Integer.parseInt(type.dimension());
-        for (int dim = 0; dim < dimension; dim++) {
-          ret.append("[]");
-        }
-        return ret.toString();
-      } catch (Exception e) {
-        return "";
-      }
-    }
-
-
-  }
 }
