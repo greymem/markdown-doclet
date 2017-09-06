@@ -3,12 +3,11 @@ A doclet to output javadoc as Markdown
 
 This library provides a doclet to output the javadoc comments from Java source code to markdown.
 
-_This is probably the worst code I have ever written and has only one purpose: Get my [Bouncy-GBG API](https://github.com/neuhalje/bouncy-gpg) into the [CMS](https://neuhalje.github.io/bouncy-gpg/). The code is untested and has been beaten into submission with a lead-pipe._
+_This is probably the worst code I have ever written and has only one purpose: Get this [javadoc](https://github.com/neuhalje/bouncy-gpg) into a [CMS](https://neuhalje.github.io/bouncy-gpg/).  The code is untested, ugly, does only halve of what the 'html javadoc' does - but it works good enough._
 
 If you want to use this code as well, I _might_ help adding some decency to it ;-)
 
-The base, some ideas and shamelessly stolen from the
-[xml-doclet](https://github.com/MarkusBernhardt/xml-doclet) library by Markus Bernhardt.
+The base was shamelessly stolen from the [xml-doclet](https://github.com/MarkusBernhardt/xml-doclet) library by Markus Bernhardt.
 
 Usage
 -----
@@ -54,9 +53,10 @@ TODO
 ======
 
 [x] Varargs
-[ ] TODO: configure root url
-[ ] TODO: configure root package
+[ ] Freemarker from a custom folder
+[ ] configure root url
+[ ] configure root package
 [ ] Java 8
 [ ] Annotations for everything
 [ ] Fields
-[ ] Inherited 
+[ ] Inherited  everything
