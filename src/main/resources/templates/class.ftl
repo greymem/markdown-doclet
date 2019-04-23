@@ -1,16 +1,43 @@
 <#import "lib/java.ftl" as java>
----
-title: ${subject.name()}
-linktitle: ${subject.name()}
-<#if subject.firstSentenceTags()?has_content>description: <@compress  single_line=true><@java.tags subject.firstSentenceTags() /></@compress></#if>
----
-<#-- Doc -->
-<@java.tags subject.inlineTags() />
 
+`package` `${subject.containingPackage().name()}`
 
 <#-- Base class/interface -->
-${java.annotations_for(subject)} **<@compress  single_line=true>${java.modifiers(subject)}  ${subject.typeName()}</@compress>**
+${java.annotations_for(subject)}
+# <@compress  single_line=true>${java.modifiers(subject)}  ${subject.typeName()}</@compress>
 <#if subject.isClass()>
+
+---
+<#-- Class description -->
+<@java.tags subject.inlineTags() />
+
+<#-- All Class fields -->
+<#if subject.fields()?has_content>
+## Fields
+  <#list subject.fields() as field>
+*  ${field.name()} - ${field.commentText()}
+  </#list>
+</#if>
+
+<#-- Constructor -->
+<#list subject.constructors()>
+## Constructor
+<#items as constructor>
+---
+### ${constructor.name()}(<@java.parameterList constructor.parameters() />) <@java.exceptionList constructor.thrownExceptionTypes() />
+
+<@java.tags constructor.inlineTags() />
+
+
+<#if constructor.typeParameters()?has_content>
+<@java.typeParameterWithTags util constructor.typeParameters()/>
+</#if>
+<#if constructor.paramTags()?has_content>
+<@java.parameterTags constructor.paramTags() />
+</#if>
+</#items>
+
+</#list>
 
 ${java.classHierarchyWithInterfaces(subject, " * ", true)}
 <#elseif subject.isInterface() >
@@ -32,18 +59,9 @@ ${java.classHierarchyWithInterfaces(subject, " * ", true)}
 </#list>
 
 <#-- Methods -->
-
-<#list subject.methods()>
 ## Methods
-|Method                | Description  |
-|----------------------|--------------------------|
-  <#items  as method>
-| ${java.modifier(method)}  ${java.link(method.returnType())} ${method.name()}(<@java.parameterList method.parameters() />) <@java.exceptionList method.thrownExceptionTypes() /> |  <@compress  single_line=true><@java.tags method.firstSentenceTags() /></@compress> |
-  </#items>
-</#list>
-
 <#list subject.methods() as method>
----
+
 ### ${method.name()}
 
 ${java.annotations_for(method)} ${java.link(method.returnType())} ${method.name()}(<@java.parameterList method.parameters() />) <@java.exceptionList method.thrownExceptionTypes() />
@@ -65,36 +83,3 @@ ${java.annotations_for(method)} ${java.link(method.returnType())} ${method.name(
 TODO: ThrowsTag[]throwsTags();
   </#if>
 </#list>
-
-
-<#list subject.constructors()>
-## Constructor
-<#items as constructor>
----
-### ${constructor.name()}(<@java.parameterList constructor.parameters() />) <@java.exceptionList constructor.thrownExceptionTypes() />
-
-<@java.tags constructor.inlineTags() />
-
-
-<#if constructor.typeParameters()?has_content>
-<@java.typeParameterWithTags util constructor.typeParameters()/>
-</#if>
-<#if constructor.paramTags()?has_content>
-<@java.parameterTags constructor.paramTags() />
-</#if>
-</#items>
-
-</#list>
-
-
-
-<#if subject.fields()?has_content>
-## Fields
-  <#list subject.fields() as field>
-*  ${field.name()}
-  </#list>
-</#if>
-
-
-
-`package` `${subject.containingPackage().name()}`
